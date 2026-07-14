@@ -6,17 +6,17 @@
 
 ## Standard Sequence
 
-1. **Understand** — 요청을 명확히 이해. 모호하면 질문. 가정하지 말 것.
-2. **Plan** — 간단한 일은 mentally plan. 복잡하면 write plan.
-3. **Execute** — minimal diff 원칙. 요청 범위를 넘지 말 것.
-4. **Verify** — `recall("known pitfalls for {domain}")` → lint → typecheck → test
+1. **Understand** — 요청을 명확히 이해. 모호하면 질문. 가정하지 말 것. "확인해봐" = review only, do not act.
+2. **Plan** — 간단하면 mentally plan. 복잡하면 write plan.
+3. **Execute** — minimal diff. 요청 범위 초과 금지. YAGNI 체크.
+4. **Verify** — `recall("known pitfalls")` → lint → typecheck → test
 5. **Save** — 결정/패턴/인사이트를 `remember()`로 저장
 
 ## Preference Learning Loop (MUST)
 
 사용자의 교정/칭찬/지시는 **영구 학습 대상**. 무시하지 말고 반드시 기록한다.
 
-- **User 교정 발생** (설명이 길다/틀렸다/태도 문제 등):
+- **User 교정 발생** (설명이 길다/틀렸다/태도 문제/싸가지):
   → `remember(type="preference", "User corrected: {exact feedback}. Context: {current task}")`
   → 즉시 행동 수정. 같은 실수 반복 금지.
 

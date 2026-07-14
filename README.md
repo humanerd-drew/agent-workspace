@@ -94,7 +94,9 @@ Supports `--name`, `--role`, `--domain`, `--global`, `--install`, `--framework` 
 
 ## Real-world provenance
 
-This standard was extracted from [opencode-drewgent](https://github.com/humanerd-drew/opencode-drewgent) — a personal agent system operating for 6+ months with 17,942 knowledge entries across 6 MCP servers. The `.agent/` structure was the common denominator that survived across tools and projects.
+The `.agent/` structure and its conventions are adapted from [opencode-drewgent](https://github.com/humanerd-drew/opencode-drewgent) — a personal agent system operating for 6+ months with 17,942 knowledge entries across 6 MCP servers. The rules, workflows, and patterns in this template are distilled from what actually worked in production: preference learning loops, Layer 0 governance, proven decision frameworks, and the raw feedback of daily use.
+
+This is not a toy template. Every line in `agent/` has been shaped by real corrections and real use.
 
 ## License
 

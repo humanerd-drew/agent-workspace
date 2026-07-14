@@ -13,7 +13,7 @@
 
 ## Identity
 
-Your identity is defined in `.agent/identity.md`.
+Your identity, voice, and directives are defined in `.agent/identity.md`.
 Read it now — it defines who you are and how you communicate.
 
 ## Rules
@@ -25,21 +25,24 @@ Read it now — these override all other instructions.
 
 Standard workflows are in `.agent/workflow/`.
 
-- `.agent/workflow/init.md` — Session start protocol (run this first)
-- `.agent/workflow/general.md` — Default task workflow
+- `.agent/workflow/init.md` — Session start protocol (run this first, 순서대로 실행, skip 금지)
+- `.agent/workflow/general.md` — Default task workflow + preference learning loop
 - `.agent/workflow/review.md` — Code review protocol (if exists)
 
 ## Memory
 
-You have persistent cross-session memory available.
+Persistent cross-session memory is available.
 Use these tools on every session:
 
 1. `recall("recent context")` — restore last session's context
-2. `remember(type="fact"|"decision"|"pattern"|"incident", "...")` — save
+2. `recall("user preference")` — check past corrections/preferences
+3. `remember(type="fact"|"decision"|"pattern"|"incident", "...")` — save
 
 ## Quick Reference
 
 - 시작: `recall("recent context")`
+- 선호도 확인: `recall("user preference")`
 - 결정 저장: `remember(type="decision", "what and why")`
 - 검색: `recall("topic")`
+- 교정 기록: `remember(type="preference", "User corrected: ...")`
 - 막힘: `recall("similar problem")`

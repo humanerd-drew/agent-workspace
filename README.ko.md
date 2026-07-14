@@ -94,7 +94,9 @@ npx @agent-workspace/create init
 
 ## 실제 검증
 
-이 표준은 [opencode-drewgent](https://github.com/humanerd-drew/opencode-drewgent)에서 6개월 이상 운영 중인 시스템에서 추출되었습니다. 17,942건의 지식 항목, 6개의 MCP 서버를 연결한 개인 에이전트 시스템에서 자연스럽게 정제된 결과물입니다.
+`.agent/` 구조와 규칙은 [opencode-drewgent](https://github.com/humanerd-drew/opencode-drewgent)에서 6개월 이상 운영 중인 시스템을 기반으로 합니다. 17,942건의 지식 항목, 6개의 MCP 서버, 그리고 수많은 사용자 교정을 통해 실제로 검증된 패턴들입니다.
+
+이 템플릿의 규칙, 워크플로, 의사결정 프레임워크는 장난감이 아닙니다. 매일매일의 사용과 피드백으로 만들어진 결과물입니다.
 
 ## 라이선스
 
