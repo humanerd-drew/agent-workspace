@@ -59,7 +59,7 @@ cat > .agent/identity.md << 'IDENTITY'
 - Never accept subagent output without verification
 - Check/review 요청 = read-only. 승인 전까지 write 금지.
 IDENTITY
-sed -i '' "s/{{NAME}}/$NAME/g" .agent/identity.md
+sed "s/{{NAME}}/$NAME/g" .agent/identity.md > .agent/identity.md.tmp && mv .agent/identity.md.tmp .agent/identity.md
 echo "  ✓ .agent/identity.md"
 
 # --- Write rules.md ---
@@ -232,6 +232,29 @@ AGENTSM
   echo "  ✓ agents.md created"
 fi
 
+# --- CLAUDE.md bridge (Claude Code needs CLAUDE.md) ---
+if [ "$FRAMEWORK" = "claude-code" ]; then
+  if [ -f CLAUDE.md ]; then
+    if ! grep -qs "\.agent/" CLAUDE.md 2>/dev/null; then
+      {
+        echo ""
+        echo "<!-- agent-workspace bridge -->"
+        echo "@agents.md"
+      } >> CLAUDE.md
+      echo "  ✓ CLAUDE.md updated with .agent/ bridge"
+    else
+      echo "  ✓ CLAUDE.md already bridges .agent/"
+    fi
+  else
+    cat > CLAUDE.md << 'CLAUDEBRIDGE'
+<!-- agent-workspace: cross-framework agent config -->
+
+@agents.md
+CLAUDEBRIDGE
+    echo "  ✓ CLAUDE.md created (→ @agents.md → .agent/)"
+  fi
+fi
+
 # --- Install memory MCP server if --install ---
 if [ -n "$INSTALL" ]; then
   if ! command -v node &>/dev/null; then
@@ -241,11 +264,17 @@ if [ -n "$INSTALL" ]; then
 
   AW_HOME="${AGENT_WORKSPACE_HOME:-$HOME/.agent-workspace}"
   if [ ! -d "$AW_HOME" ]; then
-    echo "  Downloading agent-workspace (memory MCP server)..."
-    git clone --depth 1 https://github.com/humanerd-drew/agent-workspace.git "$AW_HOME" 2>/dev/null || {
-      echo "  ⚠  git clone failed. Check network."
+    if ! command -v git &>/dev/null; then
+      echo "  ⚠  git not found. Install git or clone manually:"
+      echo "     git clone https://github.com/humanerd-drew/agent-workspace.git \"$AW_HOME\""
       INSTALL=""
-    }
+    else
+      echo "  Downloading agent-workspace (memory MCP server)..."
+      git clone --depth 1 https://github.com/humanerd-drew/agent-workspace.git "$AW_HOME" 2>/dev/null || {
+        echo "  ⚠  git clone failed. Check network."
+        INSTALL=""
+      }
+    fi
   fi
 
   if [ -n "$INSTALL" ]; then
@@ -294,21 +323,32 @@ case "$FRAMEWORK" in
         echo "  ⚠  Add to opencode.jsonc \"mcp\" section manually:"
         echo '     "agent-memory": { "type": "local", "command": ["'"$MCP_CMD"'", '"$MCP_ARGS_JSON"'] }'
       else
-        python3 -c "
+        PYTHON_CMD=$(command -v python3 || command -v python || true)
+        if [ -n "$PYTHON_CMD" ]; then
+          "$PYTHON_CMD" -c "
 import json, sys
 CMD = '''$MCP_CMD'''
 ARGS_STR = '''$MCP_ARGS_JSON'''
-args = json.loads('[' + ARGS_STR + ']')
+try:
+    args = json.loads('[' + ARGS_STR + ']')
+except json.JSONDecodeError:
+    sys.exit(2)
 with open('opencode.jsonc') as f:
     raw = f.read()
-data = json.loads(raw)
+try:
+    data = json.loads(raw)
+except json.JSONDecodeError:
+    sys.exit(3)
 if 'mcp' not in data:
     data['mcp'] = {}
 data['mcp']['agent-memory'] = {'type': 'local', 'command': [CMD] + args}
 with open('opencode.jsonc', 'w') as f:
     json.dump(data, f, indent=2, ensure_ascii=False)
     f.write(chr(10))
-" 2>/dev/null || echo "  \u26a0  Manual: add agent-memory to opencode.jsonc mcp section"
+" 2>/dev/null || echo "  ⚠  Manual: add agent-memory to opencode.jsonc mcp section (JSONC comments? use json not jsonc)"
+        else
+          echo "  ⚠  Manual: add agent-memory to opencode.jsonc mcp section"
+        fi
         echo "  ✓ opencode.jsonc: agent-memory MCP added"
       fi
     fi
@@ -349,10 +389,8 @@ CURSORJSON
 esac
 
 # --- .gitignore ---
-if [ -f .gitignore ]; then
-  if ! grep -q ".agent/memory/knowledge.db" .gitignore 2>/dev/null; then
-    echo ".agent/memory/knowledge.db" >> .gitignore
-  fi
+if ! grep -qs ".agent/memory/knowledge.db" .gitignore 2>/dev/null; then
+  echo ".agent/memory/knowledge.db" >> .gitignore
 fi
 
 echo ""
