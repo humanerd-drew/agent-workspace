@@ -2,7 +2,7 @@
 
 [🇰🇷 한국어](README.ko.md)
 
-A portable workspace that keeps your agent's identity, rules, workflows, and memory consistent across opencode, Claude Code, Cursor, and any MCP-compatible tool.
+A portable settings directory that keeps your AI agent's personality, rules, and memory consistent across opencode, Claude Code, Cursor, and other compatible tools.
 
 ```bash
 curl -fsSL https://raw.githubusercontent.com/humanerd-drew/agent-workspace/main/init.sh | bash
@@ -10,83 +10,52 @@ curl -fsSL https://raw.githubusercontent.com/humanerd-drew/agent-workspace/main/
 
 ---
 
-## Why
+## What is this
 
-AGENTS.md standardized the instruction file format — a big step. But identity, rules, workflow, MCP config, and memory are still managed differently by each tool. Switch from opencode to Claude Code and your agent starts from zero.
+Every AI coding agent stores its settings differently. Switch from one to another and you start from scratch — your identity, rules, and past conversations don't carry over.
 
-At least three independent converter projects (sno-ai/mda, bodyboard, microsoft/skills) exist to bridge this gap. Converters exist because something isn't standardized.
+The `.agent/` directory is a shared settings folder that multiple tools can read. Change tools, keep your agent.
 
-This project takes a different approach: instead of converting between formats, use the same directory structure everywhere.
-
-## Structure
+## What's inside
 
 ```
 .agent/
-├── identity.md       # Role, voice, values
-├── rules.md          # Immutable rules (must / must not)
+├── identity.md       # Who you are — your agent's personality and voice
+├── rules.md          # What never to do — immutable rules
 ├── workflow/
-│   ├── init.md       # Session start protocol
-│   └── general.md    # Default task workflow
-└── memory/           # SQLite FTS5 (auto-created)
-
-AGENTS.md             # AAIF bridge — references .agent/
+│   ├── init.md       # How to start a session
+│   └── general.md    # How to handle tasks
+└── memory/           # Past conversations and decisions
 ```
 
-AGENTS.md is no longer a monolithic file. It's an entry point that delegates to `.agent/`. **Switch tools, keep your agent.**
+Plain text files, read directly by the agent.
 
-## Quick start
+## Getting started
 
 ### One-liner
+
+Auto-detects your current tool and configures everything:
 
 ```bash
 curl -fsSL https://raw.githubusercontent.com/humanerd-drew/agent-workspace/main/init.sh | bash
 ```
 
-Auto-detects your framework, creates `.agent/`, and configures MCP memory.
+### Manual setup
 
-### Manual
-
-Copy the `agent/` directory to `.agent/` and add this to AGENTS.md:
+Copy the `agent/` folder and rename it to `.agent/`. Add one line to `AGENTS.md`:
 
 ```markdown
 Read .agent/identity.md, .agent/rules.md at session start.
 ```
 
-### Memory (MCP server, optional)
+### Persistent memory (optional)
 
-```bash
-curl -fsSL https://raw.githubusercontent.com/humanerd-drew/agent-workspace/main/init.sh | bash -s -- --install
-```
-
-| Tool | Description |
-|------|-------------|
-| `agent-memory_remember` | Store |
-| `agent-memory_recall` | FTS5 search |
-| `agent-memory_forget` | Delete |
-| `agent-memory_update` | Update |
-| `agent-memory_memory-stats` | Statistics |
-
-SQLite FTS5. No external APIs.
-
-## Repository
-
-```
-agent-workspace/
-├── agent/                # Reference .agent/ template
-├── init.sh               # One-liner setup
-├── packages/memory/      # MCP server (TypeScript)
-├── packages/create/      # CLI init command (TypeScript)
-└── AGENTS.md             # AAIF bridge
-```
-
-Requires Node.js for the MCP server.
+Add `--install` to enable cross-session memory.
 
 ## Reference
 
-This standard was extracted from [opencode-drewgent](https://github.com/humanerd-drew/opencode-drewgent) — a personal agent system with 17,942 knowledge entries and 6 MCP servers, running for 6 months.
-
-It works. ㅎ
+This standard was extracted from [opencode-drewgent](https://github.com/humanerd-drew/opencode-drewgent), a personal agent system running in production for 6 months.
 
 ## License
 
-MIT. Fork, use, share. PRs and issues welcome.
+MIT.

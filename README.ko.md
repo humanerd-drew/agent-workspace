@@ -2,7 +2,7 @@
 
 [🇺🇸 English](README.md)
 
-AI 에이전트가 opencode, Claude Code, Cursor 등 어떤 도구에서든 동일한 설정과 메모리를 유지하게 해주는 워크스페이스 표준입니다.
+AI 에이전트(챗봇/코딩 도우미)가 어떤 프로그램을 쓰든 같은 성격, 같은 규칙, 같은 기억을 유지하게 해주는 설정 폴더입니다.
 
 ```bash
 curl -fsSL https://raw.githubusercontent.com/humanerd-drew/agent-workspace/main/init.sh | bash
@@ -10,85 +10,53 @@ curl -fsSL https://raw.githubusercontent.com/humanerd-drew/agent-workspace/main/
 
 ---
 
-## 왜 만들었나
+## 이게 뭔가요
 
-AGENTS.md는 에이전트 명령어를 표준화했지만, **identity, rules, workflow, MCP 설정, 메모리는 여전히 각 도구가 제각각**입니다. opencode에서 Claude Code로 갈아타면 모든 설정이 리셋됩니다.
+AI 에이전트(예: opencode, Claude Code, Cursor)는 각자 설정을 저장하는 방식이 다릅니다. A라는 프로그램에서 설정해도 B로 옮기면 처음부터 다시 해야 해요.
 
-이 문제를 해결하려는 converter 프로젝트가 sno-ai/mda, bodyboard, microsoft/skills 등 최소 3개가 독립적으로 생겨났습니다. converter가 생긴다는 건, 무언가 표준화되지 않았다는 뜻입니다.
+`.agent/` 폴더는 모든 프로그램이 공통으로 읽는 설정 파일들을 담고 있습니다. 프로그램이 바뀌어도 이 폴더만 있으면 에이전트가 같은 방식으로 동작합니다.
 
-저는 변환 대신 **같은 구조를 모든 도구가 읽게 하자**는 접근을 택했습니다.
-
-## 구조
+## 무엇이 들어있나요
 
 ```
 .agent/
-├── identity.md       # 역할, 말투, 가치관 — 에이전트의 성격
-├── rules.md          # 불변 규칙 (must / must not)
+├── identity.md       # "당신은 누구인가" — 에이전트의 성격과 말투
+├── rules.md          # "절대 하지 말아야 할 것" — 불변 규칙
 ├── workflow/
-│   ├── init.md       # 세션 시작 프로토콜
-│   └── general.md    # 일반 작업 워크플로
-└── memory/           # SQLite FTS5 영구 메모리
-
-AGENTS.md             # AAIF 표준 브리지 (".agent/를 읽어라")
+│   ├── init.md       # 작업을 시작할 때의 루틴
+│   └── general.md    # 일반적인 작업 방식
+└── memory/           # 지난 대화와 결정을 기억하는 저장소
 ```
 
-AGENTS.md는 더 이상 모든 내용을 담는 파일이 아닙니다. 표준 진입점 역할만 하고, 실제 설정은 `.agent/`로 위임합니다. **도구를 바꿔도 `.agent/`는 그대로입니다.**
+각 파일은 일반 텍스트로 작성되며, 내용은 에이전트가 직접 읽습니다.
 
-## 어떻게 쓰나
+## 어떻게 시작하나요
 
-### curl | bash 한 줄 설치
+### 자동 설치
+
+터미널에서 이 명령어를 실행하면 현재 사용 중인 프로그램을 감지해서 자동으로 설정합니다:
 
 ```bash
 curl -fsSL https://raw.githubusercontent.com/humanerd-drew/agent-workspace/main/init.sh | bash
 ```
 
-프레임워크를 자동 감지(opencode, Claude Code, Cursor)해서 `.agent/`를 생성하고 MCP 설정까지 주입합니다.
+### 직접 설정
 
-### 수동 복사
-
-템플릿 레포의 `agent/` 디렉토리를 `.agent/`로 복사하고, AGENTS.md에 한 줄 추가:
+1. 이 저장소의 `agent/` 폴더를 복사해서 `.agent/`로 이름을 바꿉니다
+2. `AGENTS.md` 파일에 아래 내용을 추가합니다:
 
 ```markdown
 Read .agent/identity.md, .agent/rules.md at session start.
 ```
 
-### 메모리 (MCP 서버, 옵션)
+### 기억 저장소 (선택사항)
 
-```bash
-curl -fsSL https://raw.githubusercontent.com/humanerd-drew/agent-workspace/main/init.sh | bash -s -- --install
-```
+위 명령어에 `--install`을 붙이면 지난 세션의 대화와 결정을 기억하는 저장소도 함께 설치됩니다. 에이전트가 전에 했던 대화를 기억하고 활용할 수 있게 됩니다.
 
-| 기능 | 설명 |
-|------|------|
-| `agent-memory_remember` | 저장 |
-| `agent-memory_recall` | FTS5 검색 |
-| `agent-memory_forget` | 삭제 |
-| `agent-memory_update` | 수정 |
-| `agent-memory_memory-stats` | 통계 |
+## 누가 사용하나요
 
-SQLite FTS5 기반. 외부 API 불필요.
-
-## 레포 구조
-
-```
-agent-workspace/
-├── agent/                # .agent/ 참고 템플릿
-├── init.sh               # curl | bash 설치 스크립트
-├── packages/memory/      # MCP 서버 (TypeScript)
-├── packages/create/      # CLI init 명령어 (TypeScript)
-└── AGENTS.md             # AAIF 브리지
-```
-
-MCP 서버와 CLI는 `packages/` 아래에 있습니다. Node.js만 있으면 실행됩니다.
-
-## Reference: opencode-drewgent
-
-이 표준은 17,942개 지식 항목, 6개 MCP 서버를 운영 중인 [opencode-drewgent](https://github.com/humanerd-drew/opencode-drewgent)에서 6개월간 검증되었습니다.
-
-실제로 되는지 궁금하시다면 — 됩니다. ㅎ
+이 표준은 제 개인 프로젝트인 [opencode-drewgent](https://github.com/humanerd-drew/opencode-drewgent)에서 6개월간 실제로 사용되며 검증되었습니다.
 
 ## 라이선스
 
-MIT. Fork해서 자유롭게 쓰세요. PR/이슈 환영합니다.
-
-표준은 혼자 만드는 게 아니니까, 의견 있으면 편하게 얘기해주세요.
+MIT 라이선스입니다. 자유롭게 사용하고 공유하세요.
