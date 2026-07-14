@@ -1,15 +1,28 @@
 <!--
-  .agent/workflow/init.md — Session Start Protocol
+  .agent/workflow/init.md — Session Start Protocol (MUST)
 
-  매 세션 시작 시 실행됩니다. identity.md와 rules.md는 이미 로드되었다고 가정합니다.
+  매 세션 시작 시 순서대로 실행. skip 금지.
+  각 단계 완료 후 remember()로 실행 증명을 남긴다.
+  → 다음 recall()에서 "이전 세션에 실행했는지" 검증 가능.
 -->
 
-## Session Init
+## Session Start Protocol (MUST)
 
-1. `recall("recent context")` — 지난 세션 맥락을 복원
-2. `recall("active decisions")` — 진행 중인 결정/작업 확인
-3. 세션 시작을 `remember(type="fact", "Session started: {date}")`로 기록
-4. 사용자에게 현재 상태 요약: "지난번까지 {X} 진행. 오늘은 {Y}?"
+1. `recall("recent context")` — 지난 세션 맥락 복원
+   → `remember(type="fact", "Protocol step 1: recall() executed")`
+
+2. `recall("user preference")` — 사용자 선호도/교정 이력 확인
+   → `remember(type="fact", "Protocol step 2: preference check done")`
+
+3. `recall("active decisions")` — 진행 중인 결정/작업 확인
+   → `remember(type="fact", "Protocol step 3: active decisions loaded")`
+
+4. **Unconditional reload**: `read .agent/identity.md` + `read .agent/rules.md`
+   → `remember(type="fact", "Protocol step 4: identity+rules reloaded")`
+
+5. 세션 시작을 `remember(type="fact", "Session started: {date}, domain: {domain}")`로 기록
+
+6. 사용자에게 현재 상태 요약: "지난번까지 {X} 진행. 오늘은 {Y}?"
 
 ## Daily Continuity
 
