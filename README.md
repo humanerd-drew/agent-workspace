@@ -2,7 +2,7 @@
 
 [🇰🇷 한국어](README.ko.md)
 
-A portable settings directory that keeps your AI agent's personality, rules, and memory consistent across opencode, Claude Code, Cursor, and other compatible tools.
+A portable settings folder that keeps your AI agent's personality, rules, and memory consistent across opencode, Claude Code, Cursor, and other compatible tools.
 
 ```bash
 curl -fsSL https://raw.githubusercontent.com/humanerd-drew/agent-workspace/main/init.sh | bash
@@ -10,39 +10,41 @@ curl -fsSL https://raw.githubusercontent.com/humanerd-drew/agent-workspace/main/
 
 ---
 
-## What is this
+## Why
 
-Every AI coding agent stores its settings differently. Switch from one to another and you start from scratch — your identity, rules, and past conversations don't carry over.
+AGENTS.md standardized the instruction file format — a much-needed step. But your agent's identity, workflow, and memory are still stored differently by each tool. Switch tools and all of that resets.
 
-The `.agent/` directory is a shared settings folder that multiple tools can read. Change tools, keep your agent.
+Multiple independent projects (sno-ai/mda, bodyboard, microsoft/skills) emerged to convert configurations between tools. That's a sign something fundamental isn't standardized.
+
+This project takes a different approach: instead of converting between formats, use the same directory structure that all tools can read.
 
 ## What's inside
 
 ```
 .agent/
-├── identity.md       # Who you are — your agent's personality and voice
-├── rules.md          # What never to do — immutable rules
+├── identity.md       # Your agent's personality, role, and voice
+├── rules.md          # Immutable rules and constraints
 ├── workflow/
-│   ├── init.md       # How to start a session
-│   └── general.md    # How to handle tasks
-└── memory/           # Past conversations and decisions
+│   ├── init.md       # Session start routine
+│   └── general.md    # Default task workflow
+└── memory/           # Cross-session memory (auto-created)
 ```
 
-Plain text files, read directly by the agent.
+Plain text files. Manage one folder, and your agent stays the same across tools.
 
-## Getting started
+## Quick start
 
-### One-liner
-
-Auto-detects your current tool and configures everything:
+### One-liner (recommended)
 
 ```bash
 curl -fsSL https://raw.githubusercontent.com/humanerd-drew/agent-workspace/main/init.sh | bash
 ```
 
-### Manual setup
+Auto-detects your current tool and creates `.agent/` with everything configured.
 
-Copy the `agent/` folder and rename it to `.agent/`. Add one line to `AGENTS.md`:
+### Manual
+
+Copy the `agent/` folder to `.agent/` and add this to `AGENTS.md`:
 
 ```markdown
 Read .agent/identity.md, .agent/rules.md at session start.
@@ -50,12 +52,38 @@ Read .agent/identity.md, .agent/rules.md at session start.
 
 ### Persistent memory (optional)
 
-Add `--install` to enable cross-session memory.
+```bash
+curl -fsSL https://raw.githubusercontent.com/humanerd-drew/agent-workspace/main/init.sh | bash -s -- --install
+```
+
+Enables cross-session memory: remember past decisions, search them, edit or delete them.
+
+| Tool | Description |
+|------|-------------|
+| remember | Save new information |
+| recall | Search saved information |
+| forget | Delete information |
+| update | Edit information |
+| memory-stats | Show statistics |
+
+## Repository
+
+```
+agent-workspace/
+├── agent/                # Reference .agent/ template
+├── init.sh               # Setup script
+├── packages/
+│   ├── memory/           # Memory server (requires Node.js)
+│   └── create/           # Setup CLI (requires Node.js)
+└── AGENTS.md             # AAIF standard file
+```
 
 ## Reference
 
-This standard was extracted from [opencode-drewgent](https://github.com/humanerd-drew/opencode-drewgent), a personal agent system running in production for 6 months.
+This standard was extracted from [opencode-drewgent](https://github.com/humanerd-drew/opencode-drewgent) — a personal agent system running 17,942 knowledge entries across 6 MCP servers for 6 months.
 
-## License
+## License & contribution
 
-MIT.
+MIT. Fork, use, share. PRs and issues welcome.
+
+This is a personal proposal, not a formal standard. Take what works, leave what doesn't.
