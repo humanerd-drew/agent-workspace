@@ -1,8 +1,8 @@
 # `.agent/` workspace
 
-[🇺🇸 English](README.md)
+**AI 에이전트 설정, 폴더 하나로 통일하세요.** 프레임워크를 넘나드는 정체성, 규칙, 기억 체계 — opencode, Claude Code, Cursor 등 모든 도구에서 동일하게 작동합니다.
 
-AI 에이전트(예: opencode, Claude Code, Cursor)가 어떤 프로그램을 쓰든 같은 성격, 같은 규칙, 같은 기억을 유지하게 해주는 설정 폴더입니다.
+[🇺🇸 English](README.md)
 
 ```bash
 curl -fsSL https://raw.githubusercontent.com/humanerd-drew/agent-workspace/main/init.sh | bash
@@ -10,80 +10,94 @@ curl -fsSL https://raw.githubusercontent.com/humanerd-drew/agent-workspace/main/
 
 ---
 
-## 왜 만들었나
+## 문제
 
-요즘 AI 코딩 도우미는 여러 가지가 있습니다. 어떤 사람은 opencode를 쓰고, 어떤 사람은 Claude Code나 Cursor를 씁니다. 문제는 도구마다 설정 방식이 달라서, 하나에서 익숙해져도 다른 걸 쓰면 처음부터 다시 해야 한다는 점이었어요.
+AI 코딩 도우미마다 설정 방식이 다릅니다. opencode, Claude Code, Cursor, Windsurf, Copilot — 각자 제각각의 포맷으로 에이전트의 성격과 규칙을 저장합니다. 그래서 도구를 바꾸면 모든 설정이 초기화됩니다.
 
-AGENTS.md라는 파일 포맷이 있어서 명령어를 적는 방식은 통일되었습니다. 하지만 에이전트의 성격, 일하는 방식, 과거 기억은 여전히 각 프로그램이 제각각 저장하고 있어서, 프로그램을 바꾸면 모든 설정이 초기화됩니다.
+이 문제를 해결하려는 시도(sno-ai/mda, bodyboard, microsoft/skills)는 대부분 "변환"에 초점을 맞췄습니다. 하지만 이는 증상만 치료하는 겁니다. 근본 원인은 **에이전트 설정을 위한 이식 가능한 계층이 없다는 것**입니다.
 
-이 문제를 해결하려는 시도가 sno-ai/mda, bodyboard, microsoft/skills 등 여러 프로젝트에서 독립적으로 생겨났습니다. 비슷한 고민을 하는 사람이 많다는 증거였어요. 저는 그 접근과는 조금 다르게, **프로그램마다 변환하는 대신 모든 프로그램이 같은 폴더를 읽게 하자**는 방향을 택했습니다.
+## 해결책
 
-## 무엇이 들어있나요
+`.agent/`는 어떤 도구든 읽을 수 있는 평문 디렉토리입니다:
 
 ```
 .agent/
-├── identity.md       # "당신은 누구인가" — 에이전트의 성격과 말투
-├── rules.md          # "절대 하지 말아야 할 것" — 불변 규칙
+├── identity.md       # 에이전트 정체성 — 역할, 말투, 가치관
+├── rules.md          # 불변 규칙 — 항상 적용
 ├── workflow/
-│   ├── init.md       # 작업을 시작할 때의 루틴
-│   └── general.md    # 일반적인 작업 방식
-└── memory/           # 지난 대화와 결정을 기억하는 저장소
+│   ├── init.md       # 세션 시작 루틴
+│   └── general.md    # 기본 작업 방식
+└── memory/           # 세션을 넘나드는 기억 저장소
 ```
 
-각 파일은 일반 텍스트로 작성되며, `.agent/` 폴더 하나만 관리하면 모든 프로그램에서 동일하게 적용됩니다.
+`agents.md`(AAIF 표준 파일)가 `.agent/`를 참조하게 하면 끝입니다. 에이전트 설정이 당신을 따라다닙니다.
 
-## 시작하는 방법
+## 시작하기
 
-### 자동 설치 (추천)
+**자동 설치** — 현재 도구를 감지해서 모든 설정을 완료:
 
 ```bash
 curl -fsSL https://raw.githubusercontent.com/humanerd-drew/agent-workspace/main/init.sh | bash
 ```
 
-터미널에서 이 명령어를 실행하면 현재 사용 중인 프로그램을 자동으로 감지해서 `.agent/` 폴더를 만들고 설정을 마쳐줍니다.
-
-### 직접 설정
-
-이 저장소의 `agent/` 폴더를 복사해서 `.agent/`로 이름을 바꾸고, 프로젝트의 `AGENTS.md` 파일에 아래 한 줄을 추가하면 됩니다:
-
-```markdown
-Read .agent/identity.md, .agent/rules.md at session start.
-```
-
-## 기억 저장소 (선택 사항)
+**기억 저장소 포함** — 과거 세션을 기억합니다:
 
 ```bash
 curl -fsSL https://raw.githubusercontent.com/humanerd-drew/agent-workspace/main/init.sh | bash -s -- --install
 ```
 
-`--install`을 붙이면 지난 세션의 대화와 결정을 기억하는 저장소가 함께 설치됩니다. 에이전트가 전에 했던 대화를 바탕으로 더 나은 답변을 할 수 있게 됩니다.
+**직접 설정** — `agent/` 폴더를 `.agent/`로 복사하고 `agents.md`에 아래 한 줄 추가:
+
+```markdown
+Read .agent/identity.md, .agent/rules.md at session start.
+```
+
+## `init.sh` 기능
 
 | 기능 | 설명 |
 |------|------|
-| 기억하기 | 새 정보를 저장합니다 |
-| 떠올리기 | 저장된 정보를 찾습니다 |
-| 잊기 | 저장된 정보를 삭제합니다 |
-| 고치기 | 저장된 정보를 수정합니다 |
-| 통계보기 | 저장된 정보의 양을 확인합니다 |
+| **프레임워크 감지** | opencode, Claude Code, Cursor, generic 자동 감지 |
+| **템플릿 생성** | identity, rules, workflow 파일 자동 생성 |
+| **MCP 연결** | 메모리 서버를 도구에 맞게 자동 설정 |
+| **`--install`** | [@agent-workspace/memory](#agent-workspacememory) 서버 로컬 설치 및 빌드 |
+| **`--name`** | 에이전트 이름 지정 (기본값: 디렉토리명) |
 
-## 프로젝트 구조
+## 패키지
 
+`packages/` 디렉토리에 두 개의 npm 패키지가 있습니다.
+
+### `@agent-workspace/memory`
+
+영속적 세션 간 기억을 위한 MCP 서버. SQLite + FTS5 기반, 외부 API 호출 불필요, 네이티브 의존성 없음.
+
+```bash
+npx @agent-workspace/memory --db .agent/memory/knowledge.db
 ```
-agent-workspace/
-├── agent/                # .agent/ 참고 템플릿
-├── init.sh               # 설치 스크립트
-├── packages/
-│   ├── memory/           # 기억 저장소 프로그램
-│   └── create/           # 설정 생성 프로그램
-└── AGENTS.md             # AAIF 표준 파일
+
+| 기능 | 설명 |
+|------|------|
+| `remember(fact, type?)` | 기억 저장 |
+| `recall(query, limit?)` | 기억 검색 |
+| `forget(id)` | 기억 삭제 |
+| `update(id, fact?, type?)` | 기억 수정 |
+| `memory-stats()` | 통계 확인 |
+
+### `@agent-workspace/create`
+
+프레임워크 자동 감지로 `.agent/` 워크스페이스를 초기화하는 CLI.
+
+```bash
+npx @agent-workspace/create init
 ```
 
-## 실제 사용 사례
+`--name`, `--role`, `--domain`, `--global`, `--install`, `--framework` 플래그 지원.
 
-이 표준은 제 개인 프로젝트인 [opencode-drewgent](https://github.com/humanerd-drew/opencode-drewgent)에서 6개월간 검증되었습니다. 17,942건의 지식과 6개의 도구를 연결하는 시스템이 실제로 운영 중이고, `.agent/` 구조는 이 과정에서 자연스럽게 추출된 결과물입니다.
+## 실제 검증
 
-## 라이선스와 기여
+이 표준은 [opencode-drewgent](https://github.com/humanerd-drew/opencode-drewgent)에서 6개월 이상 운영 중인 시스템에서 추출되었습니다. 17,942건의 지식 항목, 6개의 MCP 서버를 연결한 개인 에이전트 시스템에서 자연스럽게 정제된 결과물입니다.
 
-MIT 라이선스입니다. Fork해서 자유롭게 쓰세요. PR이나 이슈도 환영합니다.
+## 라이선스
 
-이건 어디까지나 제 개인적인 제안에 가깝습니다. "이런 접근도 있구나" 하고 읽어주시면 좋겠어요. 표준이라는 건 혼자 만드는 게 아니니까, 의견이 있으시면 편하게 얘기해주세요.
+MIT. Fork해서 자유롭게 사용하세요. PR과 이슈도 환영합니다.
+
+개인적인 제안에 가깝습니다. "이런 접근도 있구나" 하고 읽어주시면 좋겠어요.

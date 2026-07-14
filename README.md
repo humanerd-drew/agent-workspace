@@ -1,8 +1,8 @@
 # `.agent/` workspace
 
-[🇰🇷 한국어](README.ko.md)
+**One folder to rule your AI agents.** Cross-framework identity, rules, and memory — portable across every major AI coding tool.
 
-A portable settings folder that keeps your AI agent's personality, rules, and memory consistent across opencode, Claude Code, Cursor, and other compatible tools.
+[🇰🇷 한국어](README.ko.md)
 
 ```bash
 curl -fsSL https://raw.githubusercontent.com/humanerd-drew/agent-workspace/main/init.sh | bash
@@ -10,79 +10,93 @@ curl -fsSL https://raw.githubusercontent.com/humanerd-drew/agent-workspace/main/
 
 ---
 
-## Why
+## The problem
 
-AGENTS.md standardized the instruction file format — a much-needed step. But your agent's identity, workflow, and memory are still stored differently by each tool. Switch tools and all of that resets.
+Every AI coding tool — opencode, Claude Code, Cursor, Windsurf, Copilot — has its own config format. Your agent's personality, rules, and memory are locked into one tool. Switch tools? Everything resets.
 
-Multiple independent projects (sno-ai/mda, bodyboard, microsoft/skills) emerged to convert configurations between tools. That's a sign something fundamental isn't standardized.
+There are converter projects (sno-ai/mda, bodyboard, microsoft/skills) that translate between formats. But that's a symptom, not a fix. The root cause: **there's no portable layer for agent configuration.**
 
-This project takes a different approach: instead of converting between formats, use the same directory structure that all tools can read.
+## The solution
 
-## What's inside
+`.agent/` is a plain-text directory that any tool can read:
 
 ```
 .agent/
-├── identity.md       # Your agent's personality, role, and voice
-├── rules.md          # Immutable rules and constraints
+├── identity.md       # Who the agent is — role, voice, values
+├── rules.md          # Immutable rules — always on
 ├── workflow/
 │   ├── init.md       # Session start routine
 │   └── general.md    # Default task workflow
-└── memory/           # Cross-session memory (auto-created)
+└── memory/           # Persistent cross-session memory
 ```
 
-Plain text files. Manage one folder, and your agent stays the same across tools.
+Point `agents.md` (the AAIF standard file) at `.agent/`, and your agent configuration follows you everywhere.
 
 ## Quick start
 
-### One-liner (recommended)
+**One-liner** — auto-detects your tool, sets up everything:
 
 ```bash
 curl -fsSL https://raw.githubusercontent.com/humanerd-drew/agent-workspace/main/init.sh | bash
 ```
 
-Auto-detects your current tool and creates `.agent/` with everything configured.
-
-### Manual
-
-Copy the `agent/` folder to `.agent/` and add this to `AGENTS.md`:
-
-```markdown
-Read .agent/identity.md, .agent/rules.md at session start.
-```
-
-### Persistent memory (optional)
+**With persistent memory** — remembers past sessions:
 
 ```bash
 curl -fsSL https://raw.githubusercontent.com/humanerd-drew/agent-workspace/main/init.sh | bash -s -- --install
 ```
 
-Enables cross-session memory: remember past decisions, search them, edit or delete them.
+**Manual** — copy the `agent/` folder to `.agent/`, add this to `agents.md`:
+
+```markdown
+Read .agent/identity.md, .agent/rules.md at session start.
+```
+
+## Inside `init.sh`
+
+| Feature | Detail |
+|---------|--------|
+| **Framework detection** | Detects opencode, Claude Code, Cursor, generic |
+| **Template generation** | Creates identity, rules, workflow files |
+| **MCP wiring** | Configures the memory server for your tool |
+| **`--install`** | Clones & builds the [@agent-workspace/memory](#agent-workspacememory) server locally |
+| **`--name`** | Custom agent name (default: directory name) |
+
+## Packages
+
+Two npm packages live in `packages/`:
+
+### `@agent-workspace/memory`
+
+MCP server for persistent cross-session memory. SQLite + FTS5, zero external API calls, zero native dependencies.
+
+```bash
+npx @agent-workspace/memory --db .agent/memory/knowledge.db
+```
 
 | Tool | Description |
 |------|-------------|
-| remember | Save new information |
-| recall | Search saved information |
-| forget | Delete information |
-| update | Edit information |
-| memory-stats | Show statistics |
+| `remember(fact, type?)` | Save a memory entry |
+| `recall(query, limit?)` | Full-text search across memories |
+| `forget(id)` | Delete by ID |
+| `update(id, fact?, type?)` | Update content/type |
+| `memory-stats()` | Entry count, type breakdown, DB size |
 
-## Repository
+### `@agent-workspace/create`
 
-```
-agent-workspace/
-├── agent/                # Reference .agent/ template
-├── init.sh               # Setup script
-├── packages/
-│   ├── memory/           # Memory server (requires Node.js)
-│   └── create/           # Setup CLI (requires Node.js)
-└── AGENTS.md             # AAIF standard file
+CLI to initialize `.agent/` workspace with framework auto-detection.
+
+```bash
+npx @agent-workspace/create init
 ```
 
-## Reference
+Supports `--name`, `--role`, `--domain`, `--global`, `--install`, `--framework` flags.
 
-This standard was extracted from [opencode-drewgent](https://github.com/humanerd-drew/opencode-drewgent) — a personal agent system running 17,942 knowledge entries across 6 MCP servers for 6 months.
+## Real-world provenance
 
-## License & contribution
+This standard was extracted from [opencode-drewgent](https://github.com/humanerd-drew/opencode-drewgent) — a personal agent system operating for 6+ months with 17,942 knowledge entries across 6 MCP servers. The `.agent/` structure was the common denominator that survived across tools and projects.
+
+## License
 
 MIT. Fork, use, share. PRs and issues welcome.
 
