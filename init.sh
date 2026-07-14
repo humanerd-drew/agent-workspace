@@ -1,19 +1,20 @@
 #!/usr/bin/env bash
 # init.sh — Initialize .agent/ workspace
 # Usage: curl -fsSL https://raw.githubusercontent.com/humanerd-drew/agent-workspace/main/init.sh | bash
-#        bash init.sh [--dir .] [--name "Agent"] [--yes]
+#        bash init.sh [--dir .] [--name "Agent"] [--install] [--yes]
 
 set -euo pipefail
 
 DIR="${DIR:-.}"
 NAME="${NAME:-}"
 YES="${YES:-}"
-TONE="${TONE:-Direct and precise}"
+INSTALL="${INSTALL:-}"
 
 while [ $# -gt 0 ]; do
   case "$1" in
     --dir) DIR="$2"; shift 2 ;;
     --name) NAME="$2"; shift 2 ;;
+    --install) INSTALL=1; shift ;;
     --yes|-y) YES=1; shift ;;
     *) echo "Unknown: $1"; exit 1 ;;
   esac
@@ -140,62 +141,119 @@ AGENTSM
   echo "  ✓ AGENTS.md created"
 fi
 
+# --- Install memory MCP server if --install ---
+if [ -n "$INSTALL" ]; then
+  if ! command -v node &>/dev/null; then
+    echo "  ⚠  Node.js not found. Install from https://nodejs.org/"
+    INSTALL=""
+  fi
+
+  AW_HOME="${AGENT_WORKSPACE_HOME:-$HOME/.agent-workspace}"
+  if [ ! -d "$AW_HOME" ]; then
+    echo "  Downloading agent-workspace (memory MCP server)..."
+    git clone --depth 1 https://github.com/humanerd-drew/agent-workspace.git "$AW_HOME" 2>/dev/null || {
+      echo "  ⚠  git clone failed. Check network."
+      INSTALL=""
+    }
+  fi
+
+  if [ -n "$INSTALL" ]; then
+    echo "  Building memory MCP server..."
+    cd "$AW_HOME/packages/memory"
+    npm install --silent 2>/dev/null
+    npx tsc 2>/dev/null || true
+    cd "$DIR"
+
+    MEMORY_NODE="node $AW_HOME/packages/memory/dist/index.js"
+    MCP_CMD="node"
+    MCP_ARGS="$AW_HOME/packages/memory/dist/index.js --db .agent/memory/knowledge.db"
+    echo "  ✓ memory MCP server ready at $AW_HOME"
+  fi
+fi
+
 # --- Configure MCP server ---
-MCP_CMD="npx --yes @agent-workspace/memory"
-MCP_ARGS="--db .agent/memory/knowledge.db"
+if [ -z "${MCP_CMD:-}" ]; then
+  MCP_CMD="npx"
+  MCP_ARGS="--yes @agent-workspace/memory --db .agent/memory/knowledge.db"
+fi
+
+# Build MCP args as JSON string array
+json_args() {
+  local out=""
+  for a in "$@"; do
+    [ -n "$out" ] && out="$out, "
+    out="$out\"$a\""
+  done
+  echo "$out"
+}
+
+if [ -z "${MCP_CMD:-}" ]; then
+  MCP_CMD="npx"
+  MCP_ARGS="-y @agent-workspace/memory --db .agent/memory/knowledge.db"
+fi
+IFS=' ' read -r -a MCP_ARG_ARRAY <<< "$MCP_ARGS"
+MCP_ARGS_JSON=$(json_args "${MCP_ARG_ARRAY[@]}")
 
 case "$FRAMEWORK" in
   opencode)
     if [ -f opencode.jsonc ]; then
-      # Simple JSON append (works for most cases)
-      if ! grep -q "agent-memory" opencode.jsonc 2>/dev/null; then
-        # Remove trailing newline+brace, add our config, re-close
-        sed -i '' 's/}$/,\n  "mcp": {\n    "agent-memory": {\n      "type": "local",\n      "command": ["npx", "--yes", "@agent-workspace\/memory", "--db", ".agent\/memory\/knowledge.db"]\n    }\n  }\n}/' opencode.jsonc 2>/dev/null || true
-        echo "  ✓ opencode.jsonc: agent-memory MCP added"
-      else
+      if grep -q "agent-memory" opencode.jsonc 2>/dev/null; then
         echo "  ✓ opencode.jsonc: agent-memory already configured"
+      elif grep -q '"mcp"' opencode.jsonc 2>/dev/null; then
+        echo "  ⚠  Add to opencode.jsonc \"mcp\" section manually:"
+        echo '     "agent-memory": { "type": "local", "command": ["'"$MCP_CMD"'", '"$MCP_ARGS_JSON"'] }'
+      else
+        python3 -c "
+import json, sys
+CMD = '''$MCP_CMD'''
+ARGS_STR = '''$MCP_ARGS_JSON'''
+args = json.loads('[' + ARGS_STR + ']')
+with open('opencode.jsonc') as f:
+    raw = f.read()
+data = json.loads(raw)
+if 'mcp' not in data:
+    data['mcp'] = {}
+data['mcp']['agent-memory'] = {'type': 'local', 'command': [CMD] + args}
+with open('opencode.jsonc', 'w') as f:
+    json.dump(data, f, indent=2, ensure_ascii=False)
+    f.write(chr(10))
+" 2>/dev/null || echo "  \u26a0  Manual: add agent-memory to opencode.jsonc mcp section"
+        echo "  ✓ opencode.jsonc: agent-memory MCP added"
       fi
     fi
     ;;
   claude-code)
     mkdir -p .claude
-    if [ ! -f .claude/settings.local.json ] || ! grep -q "agent-memory" .claude/settings.local.json 2>/dev/null; then
-      cat > .claude/settings.local.json << 'CLAUDE'
+    cat > .claude/settings.local.json << CLAUDEJSON
 {
   "mcpServers": {
     "agent-memory": {
-      "command": "npx",
-      "args": ["--yes", "@agent-workspace/memory", "--db", ".agent/memory/knowledge.db"]
+      "command": "$MCP_CMD",
+      "args": [$MCP_ARGS_JSON]
     }
   }
 }
-CLAUDE
-      echo "  ✓ .claude/settings.local.json: agent-memory added"
-    fi
+CLAUDEJSON
+    echo "  ✓ .claude/settings.local.json: agent-memory added"
     ;;
   cursor)
     mkdir -p .cursor
-    if [ ! -f .cursor/mcp.json ] || ! grep -q "agent-memory" .cursor/mcp.json 2>/dev/null; then
-      cat > .cursor/mcp.json << 'CURSOR'
+    cat > .cursor/mcp.json << CURSORJSON
 {
   "mcpServers": {
     "agent-memory": {
-      "command": "npx",
-      "args": ["--yes", "@agent-workspace/memory", "--db", ".agent/memory/knowledge.db"]
+      "command": "$MCP_CMD",
+      "args": [$MCP_ARGS_JSON]
     }
   }
 }
-CURSOR
-      echo "  ✓ .cursor/mcp.json: agent-memory added"
-    fi
+CURSORJSON
+    echo "  ✓ .cursor/mcp.json: agent-memory added"
     ;;
   generic)
     echo "  ⚠  Manual MCP setup required."
     echo "     Add to your agent's config:"
-    echo "     {"
-    echo '       "command": "npx",'
-    echo '       "args": ["--yes", "@agent-workspace/memory", "--db", ".agent/memory/knowledge.db"]'
-    echo "     }"
+    echo '     { "type": "local", "command": ["'"$MCP_CMD"'", '"$MCP_ARGS_JSON"'] }'
     ;;
 esac
 
@@ -213,8 +271,4 @@ echo "  └───────────────────────
 echo ""
 echo "  Next steps:"
 echo "  1. Review .agent/identity.md and .agent/rules.md"
-echo "  2. Download memory MCP server:"
-echo "     git clone --depth 1 https://github.com/humanerd-drew/agent-workspace.git /tmp/aw"
-echo "     # Then configure your agent to run:"
-echo "     #   node /tmp/aw/packages/memory/dist/index.js --db .agent/memory/knowledge.db"
-echo "  3. Start your agent"
+echo "  2. Start your agent"
