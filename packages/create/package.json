@@ -1,0 +1,35 @@
+{
+  "name": "@agent-workspace/create",
+  "version": "0.1.0",
+  "description": "Initialize .agent/ workspace — cross-framework agent identity, rules, workflow, and persistent memory",
+  "keywords": ["agent", "workspace", "opencode", "claude-code", "cursor", "mcp", "memory", "template"],
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/agent-workspace/starter.git"
+  },
+  "type": "module",
+  "bin": {
+    "create-agent": "./dist/index.js",
+    "agent-init": "./dist/index.js"
+  },
+  "files": [
+    "dist",
+    "templates",
+    "README.md"
+  ],
+  "scripts": {
+    "build": "tsc && cp -r ../../templates dist/",
+    "prepublishOnly": "npm run build",
+    "dev": "tsx src/index.ts"
+  },
+  "dependencies": {},
+  "devDependencies": {
+    "@types/node": "^22.0.0",
+    "tsx": "^4.19.0",
+    "typescript": "^5.7.0"
+  },
+  "license": "MIT",
+  "engines": {
+    "node": ">=18"
+  }
+}
