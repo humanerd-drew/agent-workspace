@@ -78,6 +78,15 @@ Read .agent/identity.md, .agent/rules.md at session start.
 
 Add that to `agents.md` (or `CLAUDE.md` for Claude Code) and you're set.
 
+---
+
+> **Your agent is born in 3 seconds. Now make it yours.**
+> 
+> [Join a workshop →](https://github.com/humanerd-drew/opencode-drewgent)
+> Build a custom agent that knows your stack, your rules, your voice.
+> OpenCode users get subagent profiles, memory MCP, kanban pipeline, and more.
+> 한국어 워크샵도 있습니다.
+
 ## How init.sh works
 
 Behind the simple one-liner is a careful dance with your tools:
@@ -130,6 +139,22 @@ Every rule in `agent/` was shaped by real use: the moment you say "don't do that
 
 This is not a toy template. It's a distillation of what actually works when you share your life with an AI coding agent.
 
+### Want to go deeper?
+
+`.agent/` gives your agent a portable identity. But a real personal agent needs more — subagent profiles, memory that persists, custom skills, cron automation, kanban pipeline.
+
+That's what [opencode-drewgent](https://github.com/humanerd-drew/opencode-drewgent) is: a fully-loaded agent starter kit built on the `.agent/` foundation. Fork it in 2 minutes, or join a workshop to build your own with guidance.
+
+| | Self-serve | Workshop |
+|---|---|---|
+| Time | 2 min (clone + setup) | 3 hours (guided build) |
+| Best for | Experienced devs | Anyone who wants a tailored agent |
+| Price | Free (MIT) | Paid (16만원 KRW) |
+| Language | English / 한국어 | 한국어 |
+| Get started → | [`opencode-drewgent`](https://github.com/humanerd-drew/opencode-drewgent) | [Join next workshop](https://discord.gg/vWzDeKwpbB) |
+
+A workshop is a live session where you build your personal agent from scratch — your rules, your skills, your subagents. Past attendees left with a working agent that knows their stack and their voice. [Join the Discord](https://discord.gg/vWzDeKwpbB) for the next one.
+
 ## What it's not
 
 This is a personal proposal, not a formal standard. It might not fit your workflow, your language, or your style. That's fine. Fork it, adapt it, throw away what doesn't work.
@@ -143,3 +168,9 @@ MIT. Use it, share it, improve it. PRs and issues are genuinely welcome.
 ---
 
 *"Every time you switch tools, your agent should remember who it is — because you put that somewhere the tool can't touch."*
+
+---
+
+**Community** — [Discord](https://discord.gg/vWzDeKwpbB) | Questions, sharing, workshop announcements. 한국어/English.
+
+**opencode-drewgent** — [GitHub](https://github.com/humanerd-drew/opencode-drewgent) | The fully-loaded agent starter kit this `.agent/` standard grew out of.
