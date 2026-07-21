@@ -1,0 +1,70 @@
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+
+jobs:
+  shellcheck:
+    name: ShellCheck
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Run ShellCheck
+        uses: ludeeus/action-shellcheck@master
+        with:
+          scandir: "."
+          severity: warning
+
+  test-init-sh:
+    name: init.sh integration test
+    runs-on: ${{ matrix.os }}
+    strategy:
+      matrix:
+        os: [ubuntu-latest, macos-latest]
+    steps:
+      - uses: actions/checkout@v4
+      - name: Run init.sh in temp dir
+        run: |
+          TMPDIR=$(mktemp -d)
+          cd "$TMPDIR"
+          bash "$GITHUB_WORKSPACE/init.sh" --name "TestAgent" --yes
+          test -f .agent/identity.md || (echo "FAIL: no identity.md" && exit 1)
+          test -f .agent/rules.md || (echo "FAIL: no rules.md" && exit 1)
+          test -f .agent/workflow/init.md || (echo "FAIL: no workflow/init.md" && exit 1)
+          test -f .agent/workflow/general.md || (echo "FAIL: no workflow/general.md" && exit 1)
+          test -f agents.md || (echo "FAIL: no agents.md" && exit 1)
+          grep -q "TestAgent" .agent/identity.md || (echo "FAIL: name not substituted" && exit 1)
+          echo "ALL PASS"
+
+  test-memory:
+    name: memory package
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: packages/memory
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+      - run: npm ci
+      - run: npm run build
+      - run: echo "BUILD OK"
+
+  test-create:
+    name: create package
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: packages/create
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+      - run: npm ci
+      - run: npm run build
+      - run: echo "BUILD OK"

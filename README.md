@@ -2,6 +2,10 @@
 
 **You know what your AI agent should be. It should know it too — everywhere.**
 
+[![CI](https://github.com/humanerd-drew/agent-workspace/actions/workflows/ci.yml/badge.svg)](https://github.com/humanerd-drew/agent-workspace/actions/workflows/ci.yml)
+[![Release](https://img.shields.io/badge/release-v0.1.0-blue)](https://github.com/humanerd-drew/agent-workspace/releases)
+[![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg)](https://opensource.org/licenses/MIT)
+
 [🇰🇷 한국어](README.ko.md)
 
 ---
@@ -154,6 +158,19 @@ That's what [opencode-drewgent](https://github.com/humanerd-drew/opencode-drewge
 | Get started → | [`opencode-drewgent`](https://github.com/humanerd-drew/opencode-drewgent) | [Join next workshop](https://discord.gg/vWzDeKwpbB) |
 
 A workshop is a live session where you build your personal agent from scratch — your rules, your skills, your subagents. Past attendees left with a working agent that knows their stack and their voice. [Join the Discord](https://discord.gg/vWzDeKwpbB) for the next one.
+
+## Tutorials & Examples
+
+Learn how to write your own `.agent/` files for different roles and scenarios:
+
+- [📖 Writing Your .agent/ Files](examples/TUTORIAL.md) — step-by-step guide
+- [🎨 Frontend Developer identity](examples/identity-frontend-dev.md) — React/TypeScript focus
+- [📊 Data Scientist identity](examples/identity-data-scientist.md) — ML/statistics focus
+- [⚙️ DevOps identity](examples/identity-devops.md) — SRE/Cloudflare focus
+
+## Changelog
+
+See [CHANGELOG.md](CHANGELOG.md) for version history.
 
 ## What it's not
 

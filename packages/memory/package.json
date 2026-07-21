@@ -2,7 +2,16 @@
   "name": "@agent-workspace/memory",
   "version": "0.1.0",
   "description": "MCP server for persistent agent memory — remember/recall/forget/update across sessions with full-text search",
-  "keywords": ["mcp", "memory", "agent", "opencode", "claude-code", "cursor", "semantic-search", "fts5"],
+  "keywords": [
+    "mcp",
+    "memory",
+    "agent",
+    "opencode",
+    "claude-code",
+    "cursor",
+    "semantic-search",
+    "fts5"
+  ],
   "repository": {
     "type": "git",
     "url": "git+https://github.com/humanerd-drew/agent-workspace.git"
@@ -17,6 +26,8 @@
   ],
   "scripts": {
     "build": "tsc",
+    "test": "vitest run",
+    "test:watch": "vitest",
     "prepublishOnly": "npm run build",
     "dev": "tsx src/index.ts"
   },
@@ -27,7 +38,8 @@
   "devDependencies": {
     "@types/node": "^22.0.0",
     "tsx": "^4.19.0",
-    "typescript": "^5.7.0"
+    "typescript": "^5.7.0",
+    "vitest": "^4.1.10"
   },
   "license": "MIT",
   "engines": {

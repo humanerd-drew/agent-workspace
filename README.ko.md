@@ -153,6 +153,19 @@ npx @agent-workspace/create init
 
 워크샵은 라이브 세션으로 진행됩니다. 참가자는 자신만의 규칙, 스킬, 서브에이전트를 가진 에이전트를 완성해서 가져갑니다. [Discord 커뮤니티](https://discord.gg/vWzDeKwpbB)에서 다음 일정을 확인하세요.
 
+## 튜토리얼 & 예시
+
+다양한 역할과 시나리오에 맞춰 `.agent/` 파일을 작성하는 방법:
+
+- [📖 Writing Your .agent/ Files](examples/TUTORIAL.md) — 단계별 가이드 (영문)
+- [🎨 프론트엔드 개발자 identity](examples/identity-frontend-dev.md) — React/TypeScript 중심
+- [📊 데이터 사이언티스트 identity](examples/identity-data-scientist.md) — ML/통계 중심
+- [⚙️ DevOps identity](examples/identity-devops.md) — SRE/Cloudflare 중심
+
+## 체인지로그
+
+[CHANGELOG.md](CHANGELOG.md)에서 버전 기록을 확인하세요.
+
 ## 이것은 무엇이 아닌가
 
 이것은 개인적인 제안이지, 공식 표준이 아닙니다. 여러분의 워크플로나 언어, 스타일에 맞지 않을 수 있어요. 괜찮습니다. Fork하고, 뜯어고치고, 필요 없는 건 버리세요.
